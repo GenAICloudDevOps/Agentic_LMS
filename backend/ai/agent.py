@@ -133,9 +133,14 @@ IMPORTANT: When a student says "enroll me", "enroll for both", "enroll all", "si
         """Check if user wants to enroll and process enrollment(s)"""
         message_lower = message.lower()
         
-        # Check for enrollment keywords
+        # Check for enrollment keywords or affirmative responses
         enrollment_keywords = ["enroll", "sign up", "register", "join", "take this course", "take the course", "i want"]
-        if not any(keyword in message_lower for keyword in enrollment_keywords):
+        affirmative_keywords = ["yes", "yeah", "yep", "sure", "ok", "okay"]
+        
+        has_enrollment_intent = any(keyword in message_lower for keyword in enrollment_keywords)
+        is_affirmative = any(keyword == message_lower.strip() or keyword in message_lower.split() for keyword in affirmative_keywords)
+        
+        if not (has_enrollment_intent or is_affirmative):
             return []
         
         enrollment_results = []
@@ -177,15 +182,28 @@ IMPORTANT: When a student says "enroll me", "enroll for both", "enroll all", "si
                     courses_to_enroll.append(course)
         
         # If no specific courses found but enrollment intent detected
-        # Check for "all", "both", or number keywords which imply multiple courses from context
-        if not courses_to_enroll and any(word in message_lower for word in ["both", "all", "all 3", "all 4", "these"]):
-            # Look for courses mentioned in recent context
+        # Check for contextual references
+        if not courses_to_enroll:
             context_lower = context.lower()
-            for course in courses:
-                course_title_lower = course["title"].lower()
-                # Check if course was mentioned in recent conversation
-                if course_title_lower in context_lower:
-                    courses_to_enroll.append(course)
+            
+            # Check for "all", "both", or number keywords which imply multiple courses from context
+            if any(word in message_lower for word in ["both", "all", "all 3", "all 4", "these"]):
+                for course in courses:
+                    course_title_lower = course["title"].lower()
+                    # Check if course was mentioned in recent conversation
+                    if course_title_lower in context_lower:
+                        courses_to_enroll.append(course)
+            
+            # Check for "this", "that", or affirmative responses (yes, ok, sure)
+            # These indicate user wants to enroll in the most recently mentioned course
+            elif any(word in message_lower for word in ["this", "that"]) or is_affirmative:
+                # Find the most recently mentioned course in context
+                for course in courses:
+                    course_title_lower = course["title"].lower()
+                    if course_title_lower in context_lower:
+                        # Only add the first (most recent) match
+                        courses_to_enroll.append(course)
+                        break
         
         # Process enrollments for found courses
         for course in courses_to_enroll:

@@ -10,6 +10,7 @@ interface LandingPageProps {
 
 export default function LandingPage({ onGetStarted }: LandingPageProps) {
   const [showModal, setShowModal] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,23 +20,49 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
     setLoading(true);
 
     try {
-      const response = await studentsApi.create({ name, email });
-      onGetStarted(response.data.id);
-    } catch (error) {
-      console.error("Error creating student:", error);
-      alert("Error creating account. Please try again.");
+      if (isSignUp) {
+        // Sign Up
+        const response = await studentsApi.create({ name, email });
+        onGetStarted(response.data.id);
+      } else {
+        // Sign In
+        const response = await studentsApi.login(email);
+        onGetStarted(response.data.id);
+      }
+    } catch (error: any) {
+      console.error("Error:", error);
+      const message = error.response?.data?.detail || (isSignUp ? "Error creating account." : "Error signing in.");
+      alert(message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleMode = () => {
+    setIsSignUp(!isSignUp);
+    setName("");
+    setEmail("");
   };
 
   return (
     <div className="min-h-screen bg-slate-950">
       {/* Header with Get Started Button */}
       <div className="container mx-auto px-4 py-6">
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-4">
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              setIsSignUp(false);
+              setShowModal(true);
+            }}
+            className="bg-slate-800 text-white font-semibold py-3 px-8 rounded-lg hover:bg-slate-700 transition-all border border-slate-700"
+          >
+            Sign In
+          </button>
+          <button
+            onClick={() => {
+              setIsSignUp(true);
+              setShowModal(true);
+            }}
             className="bg-white text-slate-950 font-bold py-3 px-8 rounded-lg hover:bg-gray-100 transition-all shadow-lg"
           >
             Get Started
@@ -104,20 +131,22 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             </button>
 
             <h2 className="text-3xl font-bold text-white mb-6 text-center">
-              Get Started
+              {isSignUp ? "Get Started" : "Sign In"}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-white mb-2">Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white"
-                  placeholder="Your name"
-                  required
-                />
-              </div>
+              {isSignUp && (
+                <div>
+                  <label className="block text-white mb-2">Name</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white"
+                    placeholder="Your name"
+                    required
+                  />
+                </div>
+              )}
               <div>
                 <label className="block text-white mb-2">Email</label>
                 <input
@@ -134,8 +163,25 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                 disabled={loading}
                 className="w-full bg-white text-slate-950 font-bold py-3 px-6 rounded-lg hover:bg-gray-100 transition-all disabled:opacity-50"
               >
-                {loading ? "Creating Account..." : "Start Learning"}
+                {loading
+                  ? isSignUp
+                    ? "Creating Account..."
+                    : "Signing In..."
+                  : isSignUp
+                  ? "Start Learning"
+                  : "Sign In"}
               </button>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={toggleMode}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  {isSignUp
+                    ? "Already have an account? Sign In"
+                    : "Don't have an account? Sign Up"}
+                </button>
+              </div>
             </form>
           </div>
         </div>

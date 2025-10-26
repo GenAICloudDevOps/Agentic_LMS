@@ -17,6 +17,7 @@ export const coursesApi = {
 
 export const studentsApi = {
   create: (data: { name: string; email: string }) => api.post('/api/students', data),
+  login: (email: string) => api.post('/api/students/login', null, { params: { email } }),
   getById: (id: number) => api.get(`/api/students/${id}`),
   getEnrollments: (id: number) => api.get(`/api/students/${id}/enrollments`),
 }

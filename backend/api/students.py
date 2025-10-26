@@ -29,6 +29,14 @@ async def create_student(student: StudentIn_Pydantic):
     return Student_Pydantic.model_validate(student_obj)
 
 
+@router.post("/login", response_model=Student_Pydantic)
+async def login_student(email: str):
+    student = await Student.get_or_none(email=email)
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found with this email")
+    return Student_Pydantic.model_validate(student)
+
+
 @router.get("/{student_id}/enrollments")
 async def get_student_enrollments(student_id: int):
     student = await Student.get_or_none(id=student_id)

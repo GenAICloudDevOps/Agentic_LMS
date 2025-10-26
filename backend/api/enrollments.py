@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from models import Enrollment, Student, Course
+from email_service import send_course_enrollment_email
 
 router = APIRouter()
 
@@ -36,6 +37,20 @@ async def create_enrollment(enrollment: EnrollmentCreate):
         student_id=enrollment.student_id,
         course_id=enrollment.course_id
     )
+    
+    # Send email notification (non-blocking, won't fail enrollment)
+    try:
+        enrollment_data = {
+            "enrollment_id": enrollment_obj.id,
+            "student_name": student.name,
+            "student_email": student.email,
+            "course_title": course.title,
+            "course_category": course.category,
+            "course_difficulty": course.difficulty
+        }
+        await send_course_enrollment_email(enrollment_data)
+    except Exception as e:
+        print(f"Email notification failed but enrollment created successfully: {e}")
     
     return {
         "id": enrollment_obj.id,

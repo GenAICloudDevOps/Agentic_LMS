@@ -32,6 +32,9 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_REGION: ${AWS_REGION:-us-east-1}
       MISTRAL_API_KEY: ${MISTRAL_API_KEY}
+      GMAIL_EMAIL: ${GMAIL_EMAIL}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
     depends_on:
       postgres:
         condition: service_healthy

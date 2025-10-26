@@ -37,15 +37,13 @@ export default function Dashboard({ studentId, onBack }: DashboardProps) {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold text-white">Learning Dashboard</h1>
           <button
             onClick={onBack}
-            className="flex items-center text-white hover:text-blue-400 transition-colors"
+            className="flex items-center text-white hover:text-red-400 transition-colors bg-slate-800 px-4 py-2 rounded-lg border border-slate-700"
           >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to Home
+            Sign Out
           </button>
-          <h1 className="text-3xl font-bold text-white">Learning Dashboard</h1>
-          <div className="w-24"></div>
         </div>
 
         {/* Tab Navigation */}
