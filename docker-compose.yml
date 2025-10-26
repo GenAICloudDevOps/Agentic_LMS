@@ -35,6 +35,7 @@ services:
       GMAIL_EMAIL: ${GMAIL_EMAIL}
       GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
     depends_on:
       postgres:
         condition: service_healthy

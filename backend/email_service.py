@@ -172,11 +172,107 @@ async def send_student_welcome_email(enrollment_data: dict):
 
 async def send_course_enrollment_email(enrollment_data: dict):
     """
-    Send enrollment notifications to both admin and student
+    Send enrollment notifications to admin (email + Slack) and student (email)
     
     Args:
         enrollment_data: Dictionary containing enrollment information (student, course)
     """
-    # Send both emails concurrently
+    # Send all notifications concurrently
     await send_admin_enrollment_notification(enrollment_data)
     await send_student_welcome_email(enrollment_data)
+    await send_slack_enrollment_notification(enrollment_data)
+
+
+async def send_slack_enrollment_notification(enrollment_data: dict):
+    """
+    Send Slack notification to admin channel when a student enrolls
+    
+    Args:
+        enrollment_data: Dictionary containing enrollment information (student, course)
+    """
+    try:
+        import httpx
+        
+        slack_webhook_url = os.getenv("SLACK_WEBHOOK_URL")
+        
+        if not slack_webhook_url:
+            print("⚠️ Slack webhook URL not configured. Skipping Slack notification.")
+            return
+        
+        # Create Slack message with rich formatting
+        message = {
+            "text": f"🎓 New Enrollment: {enrollment_data['student_name']} enrolled in {enrollment_data['course_title']}",
+            "blocks": [
+                {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "🎓 New Course Enrollment",
+                        "emoji": True
+                    }
+                },
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Student:*\n{enrollment_data['student_name']}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Email:*\n{enrollment_data['student_email']}"
+                        }
+                    ]
+                },
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Course:*\n{enrollment_data['course_title']}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Category:*\n{enrollment_data['course_category']}"
+                        }
+                    ]
+                },
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Difficulty:*\n{enrollment_data['course_difficulty']}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Enrollment ID:*\n#{enrollment_data['enrollment_id']}"
+                        }
+                    ]
+                },
+                {
+                    "type": "context",
+                    "elements": [
+                        {
+                            "type": "mrkdwn",
+                            "text": f"⏰ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                        }
+                    ]
+                },
+                {
+                    "type": "divider"
+                }
+            ]
+        }
+        
+        # Send to Slack
+        async with httpx.AsyncClient() as client:
+            response = await client.post(slack_webhook_url, json=message, timeout=10.0)
+            
+            if response.status_code == 200:
+                print(f"✅ Slack notification sent successfully")
+            else:
+                print(f"⚠️ Slack notification failed with status {response.status_code}")
+        
+    except Exception as e:
+        print(f"❌ Failed to send Slack notification: {str(e)}")

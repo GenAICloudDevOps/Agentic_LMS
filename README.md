@@ -24,6 +24,16 @@ _Browse and filter courses by category and difficulty_
 ![My Enrollments](screenshots/4.jpg)
 _Track your enrolled courses and progress_
 
+### Email Notifications
+
+![Email Notifications](screenshots/5.emailnotification.jpg)
+_Automated email notifications for enrollments_
+
+### Slack Notifications
+
+![Slack Notifications](screenshots/6.slacknotifications.jpg)
+_Real-time Slack alerts for admin_
+
 ## ✨ Features
 
 - 🤖 **AI-Powered Chat Assistant** - Use natural language to discover and enroll in courses
@@ -31,6 +41,8 @@ _Track your enrolled courses and progress_
 - 📚 **Course Catalog** - 10 pre-loaded courses in AI, DevOps, Docker, and Kubernetes
 - 🎓 **Progress Tracking** - Monitor your learning journey with visual progress bars
 - 💬 **Multi-Model Support** - Choose from Gemini, AWS Bedrock, or Mistral AI
+- 📧 **Email Notifications** - Automated Gmail notifications for enrollments (admin + student)
+- 💬 **Slack Integration** - Real-time Slack alerts for admin on new enrollments
 - 🐳 **Fully Containerized** - One command to start everything with Docker
 - 🎨 **Modern UI** - Clean, dark theme with excellent readability
 
@@ -46,6 +58,8 @@ _Track your enrolled courses and progress_
   - Google Gemini (2.5-pro, 2.5-flash, 2.5-flash-lite)
   - AWS Bedrock (Nova, Claude Sonnet)
   - Mistral AI
+- Email notifications with aiosmtplib
+- Slack webhook integration
 
 ### Frontend
 
@@ -74,10 +88,19 @@ _Track your enrolled courses and progress_
 2. **Add your API keys to `.env`**
 
    ```env
+   # AI Models (at least one required)
    GEMINI_API_KEY=your_key_here
    AWS_ACCESS_KEY_ID=your_key_here (optional)
    AWS_SECRET_ACCESS_KEY=your_key_here (optional)
    MISTRAL_API_KEY=your_key_here (optional)
+   
+   # Email Notifications (optional)
+   GMAIL_EMAIL=your_gmail@gmail.com
+   GMAIL_APP_PASSWORD=your_16_char_app_password
+   ADMIN_EMAIL=admin@gmail.com
+   
+   # Slack Notifications (optional)
+   SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
    ```
 
 3. **Start everything**
@@ -101,6 +124,38 @@ _Track your enrolled courses and progress_
    - "Enroll me in Introduction to AI"
 4. **Browse Courses** - Explore the course catalog and filter by category
 5. **Track Progress** - View your enrollments and monitor your learning journey
+
+## 📧 Notifications Setup
+
+### Gmail Notifications
+
+The platform sends automated emails when students enroll in courses:
+- **Admin Email**: Enrollment notification with student and course details
+- **Student Email**: Welcome email with course information and next steps
+
+**Setup:**
+1. Enable 2-Step Verification on your Google Account
+2. Generate an App Password: https://myaccount.google.com/apppasswords
+3. Add credentials to `.env`:
+   ```env
+   GMAIL_EMAIL=your_gmail@gmail.com
+   GMAIL_APP_PASSWORD=your_16_char_app_password
+   ADMIN_EMAIL=admin@gmail.com
+   ```
+
+### Slack Notifications
+
+Get real-time enrollment alerts in your Slack workspace.
+
+**Setup:**
+1. Follow the detailed guide in [slack.md](slack.md)
+2. Create a Slack app and incoming webhook
+3. Add webhook URL to `.env`:
+   ```env
+   SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+   ```
+
+**Note:** Both notification systems are optional. The platform works without them.
 
 ## Database Migrations
 
@@ -128,12 +183,14 @@ lms-platform/
 │   ├── api/             # FastAPI routes
 │   ├── models.py        # Tortoise ORM models
 │   ├── database.py      # DB initialization
+│   ├── email_service.py # Email and Slack notifications
 │   └── main.py          # FastAPI app
 ├── frontend/
 │   ├── app/             # Next.js pages
 │   ├── components/      # React components
 │   └── lib/             # API client
-└── docker-compose.yml
+├── docker-compose.yml
+└── slack.md             # Slack setup guide
 ```
 
 ## Development
