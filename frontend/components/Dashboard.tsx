@@ -6,6 +6,12 @@ import CourseCatalog from './CourseCatalog'
 import MyEnrollments from './MyEnrollments'
 import { ArrowLeft, MessageSquare, BookOpen, GraduationCap } from 'lucide-react'
 
+interface Message {
+  role: 'user' | 'assistant'
+  content: string
+  enrolled?: boolean
+}
+
 interface DashboardProps {
   studentId: number
   onBack: () => void
@@ -14,6 +20,12 @@ interface DashboardProps {
 export default function Dashboard({ studentId, onBack }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<'chat' | 'courses' | 'enrollments'>('chat')
   const [enrollmentKey, setEnrollmentKey] = useState(0)
+  const [chatMessages, setChatMessages] = useState<Message[]>([
+    {
+      role: 'assistant',
+      content: 'Hello! I\'m your AI learning assistant. I can help you discover courses, answer questions about our programs, and assist with enrollment. What would you like to learn today?'
+    }
+  ])
 
   const handleEnrollmentChange = () => {
     // Force refresh of enrollments component
@@ -64,6 +76,8 @@ export default function Dashboard({ studentId, onBack }: DashboardProps) {
             <ChatInterface 
               studentId={studentId} 
               onEnrollmentChange={handleEnrollmentChange}
+              messages={chatMessages}
+              setMessages={setChatMessages}
             />
           )}
           {activeTab === 'courses' && (

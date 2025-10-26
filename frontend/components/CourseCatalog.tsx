@@ -14,10 +14,12 @@ export default function CourseCatalog({ studentId, onEnrollmentChange }: CourseC
   const [categories, setCategories] = useState<string[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [loading, setLoading] = useState(true)
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState<number[]>([])
 
   useEffect(() => {
     loadCourses()
     loadCategories()
+    loadEnrolledCourses()
   }, [selectedCategory])
 
   const loadCourses = async () => {
@@ -41,10 +43,20 @@ export default function CourseCatalog({ studentId, onEnrollmentChange }: CourseC
     }
   }
 
+  const loadEnrolledCourses = async () => {
+    try {
+      const response = await enrollmentsApi.getEnrolledCourses(studentId)
+      setEnrolledCourseIds(response.data.enrolled_course_ids)
+    } catch (error) {
+      console.error('Error loading enrolled courses:', error)
+    }
+  }
+
   const handleEnroll = async (courseId: number) => {
     try {
       await enrollmentsApi.create({ student_id: studentId, course_id: courseId })
       alert('Successfully enrolled!')
+      loadEnrolledCourses() // Refresh enrolled courses
       if (onEnrollmentChange) {
         onEnrollmentChange()
       }
@@ -83,6 +95,7 @@ export default function CourseCatalog({ studentId, onEnrollmentChange }: CourseC
             <CourseCard
               key={course.id}
               course={course}
+              isEnrolled={enrolledCourseIds.includes(course.id)}
               onEnroll={() => handleEnroll(course.id)}
             />
           ))}
@@ -92,7 +105,7 @@ export default function CourseCatalog({ studentId, onEnrollmentChange }: CourseC
   )
 }
 
-function CourseCard({ course, onEnroll }: any) {
+function CourseCard({ course, isEnrolled, onEnroll }: any) {
   const difficultyColor = {
     Beginner: 'text-green-400',
     Intermediate: 'text-yellow-400',
@@ -120,10 +133,15 @@ function CourseCard({ course, onEnroll }: any) {
       </div>
       
       <button
-        onClick={onEnroll}
-        className="w-full bg-gradient-to-r from-blue-500 to-violet-500 text-white py-2 rounded-lg hover:from-blue-600 hover:to-violet-600 transition-all"
+        onClick={isEnrolled ? undefined : onEnroll}
+        disabled={isEnrolled}
+        className={`w-full py-2 rounded-lg transition-all ${
+          isEnrolled
+            ? 'bg-green-600 text-white cursor-not-allowed'
+            : 'bg-gradient-to-r from-blue-500 to-violet-500 text-white hover:from-blue-600 hover:to-violet-600'
+        }`}
       >
-        Enroll Now
+        {isEnrolled ? 'Enrolled' : 'Enroll Now'}
       </button>
     </div>
   )

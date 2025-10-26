@@ -24,6 +24,8 @@ export const studentsApi = {
 export const enrollmentsApi = {
   create: (data: { student_id: number; course_id: number }) => 
     api.post('/api/enrollments', data),
+  getEnrolledCourses: (studentId: number) => 
+    api.get(`/api/enrollments/student/${studentId}/courses`),
 }
 
 export const chatApi = {

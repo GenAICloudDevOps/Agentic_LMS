@@ -13,15 +13,11 @@ interface Message {
 interface ChatInterfaceProps {
   studentId: number
   onEnrollmentChange?: () => void
+  messages: Message[]
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>
 }
 
-export default function ChatInterface({ studentId, onEnrollmentChange }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: 'Hello! I\'m your AI learning assistant. I can help you discover courses, answer questions about our programs, and assist with enrollment. What would you like to learn today?'
-    }
-  ])
+export default function ChatInterface({ studentId, onEnrollmentChange, messages, setMessages }: ChatInterfaceProps) {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [model, setModel] = useState('gemini-2.5-flash-lite')

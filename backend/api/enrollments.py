@@ -46,6 +46,19 @@ async def create_enrollment(enrollment: EnrollmentCreate):
     }
 
 
+@router.get("/student/{student_id}/courses")
+async def get_student_enrolled_courses(student_id: int):
+    """Get list of course IDs that a student is enrolled in"""
+    student = await Student.get_or_none(id=student_id)
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    enrollments = await Enrollment.filter(student_id=student_id).all()
+    course_ids = [enrollment.course_id for enrollment in enrollments]
+    
+    return {"enrolled_course_ids": course_ids}
+
+
 @router.patch("/{enrollment_id}")
 async def update_enrollment(enrollment_id: int, update: EnrollmentUpdate):
     enrollment = await Enrollment.get_or_none(id=enrollment_id)
