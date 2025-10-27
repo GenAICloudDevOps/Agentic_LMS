@@ -4,7 +4,7 @@ from tortoise import Tortoise
 from contextlib import asynccontextmanager
 import os
 
-from api import courses, students, enrollments, chat
+from api import courses, students, enrollments, chat, agent_viz, state_management, streaming
 from database import init_db
 
 
@@ -46,6 +46,9 @@ app.include_router(courses.router, prefix="/api/courses", tags=["Courses"])
 app.include_router(students.router, prefix="/api/students", tags=["Students"])
 app.include_router(enrollments.router, prefix="/api/enrollments", tags=["Enrollments"])
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
+app.include_router(agent_viz.router, prefix="/api/agent", tags=["Agent Visualization"])
+app.include_router(state_management.router, prefix="/api/state", tags=["State Management"])
+app.include_router(streaming.router, prefix="/api/streaming", tags=["Advanced Streaming"])
 
 
 @app.get("/")

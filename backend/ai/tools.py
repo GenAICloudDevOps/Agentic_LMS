@@ -44,6 +44,8 @@ async def search_courses_tool(query: str) -> List[Dict]:
 
 async def enroll_student_tool(student_id: int, course_id: int) -> Dict:
     """Enroll a student in a course"""
+    from email_service import send_course_enrollment_email
+    
     student = await Student.get_or_none(id=student_id)
     if not student:
         return {"success": False, "error": "Student not found"}
@@ -59,7 +61,22 @@ async def enroll_student_tool(student_id: int, course_id: int) -> Dict:
     if existing:
         return {"success": False, "error": "Already enrolled"}
     
-    await Enrollment.create(student_id=student_id, course_id=course_id)
+    enrollment_obj = await Enrollment.create(student_id=student_id, course_id=course_id)
+    
+    # Send email and Slack notifications (non-blocking, won't fail enrollment)
+    try:
+        enrollment_data = {
+            "enrollment_id": enrollment_obj.id,
+            "student_name": student.name,
+            "student_email": student.email,
+            "course_title": course.title,
+            "course_category": course.category,
+            "course_difficulty": course.difficulty
+        }
+        await send_course_enrollment_email(enrollment_data)
+    except Exception as e:
+        print(f"Notification failed but enrollment created successfully: {e}")
+    
     return {
         "success": True,
         "message": f"Successfully enrolled in {course.title}"
